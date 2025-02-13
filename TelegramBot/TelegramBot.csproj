@@ -10,6 +10,11 @@
     <ItemGroup>
       <Folder Include="Models\UserModel\" />
     </ItemGroup>
+    <ItemGroup>
+      <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />

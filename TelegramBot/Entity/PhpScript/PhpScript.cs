@@ -4,7 +4,6 @@ namespace TelegramBot.Entity.PhpScript;
 
 public class PhpScript:Document
 {
-    public long TelegramId { get; set; } 
     
     public string? AppName { get; set; }
     
@@ -17,6 +16,8 @@ public class PhpScript:Document
     public string? ScriptContent { get; set; }
     
     public string? SftpHost { get; set; } 
+    
+    public string? SftpPassword { get; set; } 
     public string? SftpLogin { get; set; } 
     
     public PhpScriptState State { get; set; }
@@ -30,6 +31,7 @@ public enum PhpScriptState
     None,            
     WaitingForAppName,
     WaitingForAppBundle, 
+    GenerationScript, 
     WaitingForSftpHost,
     WaitingForSftpLogin, 
     WaitingForSftpPassword ,

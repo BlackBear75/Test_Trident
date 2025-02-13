@@ -15,14 +15,14 @@ namespace TelegramBot.Migrations
                 name: "PhpScripts",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TelegramId = table.Column<long>(type: "bigint", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     AppName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AppBundle = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Secret = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecretKeyParam = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ScriptContent = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SftpHost = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SftpPassword = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SftpLogin = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     State = table.Column<int>(type: "int", nullable: false),
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -38,8 +38,8 @@ namespace TelegramBot.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TelegramId = table.Column<long>(type: "bigint", nullable: false),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
                     CreationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -52,14 +52,9 @@ namespace TelegramBot.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "PhpScripts",
-                columns: new[] { "Id", "AppBundle", "AppName", "CreationDate", "Deleted", "DeletionDate", "ScriptContent", "Secret", "SecretKeyParam", "SftpHost", "SftpLogin", "State", "TelegramId" },
-                values: new object[] { new Guid("a3d6f864-d0c0-4f4c-b053-04a229f442c2"), null, null, new DateTime(2023, 2, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, null, null, null, null, null, 0, 914220215L });
-
-            migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "CreationDate", "Deleted", "DeletionDate", "Role", "TelegramId", "Username" },
-                values: new object[] { new Guid("a3d6f864-d0c0-4f4c-b053-04a229f442c2"), new DateTime(2023, 2, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, 2, 914220215L, "Bogdan_Porivay" });
+                columns: new[] { "Id", "CreationDate", "Deleted", "DeletionDate", "Role", "Username" },
+                values: new object[] { 914220215L, new DateTime(2023, 2, 12, 0, 0, 0, 0, DateTimeKind.Unspecified), false, null, 2, "Bogdan_Porivay" });
         }
 
         /// <inheritdoc />

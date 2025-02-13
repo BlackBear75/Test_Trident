@@ -2,7 +2,7 @@
 
 public abstract class Document
 {
-    public Guid Id { get; set; } = Guid.NewGuid();
+    public long Id { get; set; }
     public DateTime CreationDate { get; set; }
     public bool Deleted { get; set; }
     public DateTime?  DeletionDate { get; set; }

@@ -1,22 +1,19 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TelegramBot.Configuration;
+using TelegramBot.Entity.PhpScript;
 
 namespace TelegramBot.Base.Repository;
 
 public class BaseRepository<TDocument> : IBaseRepository<TDocument> where TDocument : Document
 {
     private readonly AppDbContext _context;
-    private readonly DbSet<TDocument> _dbSet;
+    protected readonly DbSet<TDocument> _dbSet;
 
     public BaseRepository(AppDbContext context)
     {
         _context = context;
         _dbSet = context.Set<TDocument>();
-    }
-    public async Task<TDocument> FindByTelegramIdAsync(long telegramId)
-    {
-        return await _dbSet.FirstOrDefaultAsync(d => EF.Property<long>(d, "TelegramId") == telegramId && !d.Deleted);
     }
     public async Task<string> GetConnectionString()
     {
@@ -27,7 +24,7 @@ public class BaseRepository<TDocument> : IBaseRepository<TDocument> where TDocum
         return await _dbSet.Where(d => !d.Deleted).ToListAsync();
     }
 
-    public async Task<TDocument> FindByIdAsync(Guid id)
+    public async Task<TDocument> FindByIdAsync(long id)
     {
         return await _dbSet.FirstOrDefaultAsync(d => d.Id == id && !d.Deleted);
     }
@@ -60,7 +57,7 @@ public class BaseRepository<TDocument> : IBaseRepository<TDocument> where TDocum
 
         return await query.ToListAsync();
     }
-    public async Task DeleteOneAsync(Guid id)
+    public async Task DeleteOneAsync(long id)
     {
         var document = await FindByIdAsync(id);
         if (document == null) return;

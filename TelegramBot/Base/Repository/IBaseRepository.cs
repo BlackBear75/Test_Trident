@@ -4,12 +4,11 @@ namespace TelegramBot.Base.Repository;
 
 public interface IBaseRepository<TDocument> where TDocument : Document
 {
-    Task<TDocument> FindByTelegramIdAsync(long telegramId);
     Task<IEnumerable<TDocument>> GetAllAsync();
-    Task<TDocument> FindByIdAsync(Guid id);
+    Task<TDocument> FindByIdAsync(long id);
     Task InsertOneAsync(TDocument document);
     Task UpdateOneAsync(TDocument document);
-    Task DeleteOneAsync(Guid id);
+    Task DeleteOneAsync(long id);
     Task <string> GetConnectionString();
     Task<IEnumerable<TDocument>> GetWithSkipAsync(int skip, int take); 
     Task<IEnumerable<TDocument>> FilterByAsync(Expression<Func<TDocument, bool>> filterExpression);

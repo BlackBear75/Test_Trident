@@ -24,9 +24,8 @@ namespace TelegramBot.Migrations
 
             modelBuilder.Entity("TelegramBot.Entity.PhpScript.PhpScript", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<long>("Id")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("AppBundle")
                         .HasColumnType("nvarchar(max)");
@@ -58,32 +57,24 @@ namespace TelegramBot.Migrations
                     b.Property<string>("SftpLogin")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SftpPassword")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("State")
                         .HasColumnType("int");
-
-                    b.Property<long>("TelegramId")
-                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
                     b.ToTable("PhpScripts");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a3d6f864-d0c0-4f4c-b053-04a229f442c2"),
-                            CreationDate = new DateTime(2023, 2, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            State = 0,
-                            TelegramId = 914220215L
-                        });
                 });
 
             modelBuilder.Entity("TelegramBot.Entity.User.User", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
@@ -97,9 +88,6 @@ namespace TelegramBot.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.Property<long>("TelegramId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -111,11 +99,10 @@ namespace TelegramBot.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a3d6f864-d0c0-4f4c-b053-04a229f442c2"),
+                            Id = 914220215L,
                             CreationDate = new DateTime(2023, 2, 12, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Role = 2,
-                            TelegramId = 914220215L,
                             Username = "Bogdan_Porivay"
                         });
                 });

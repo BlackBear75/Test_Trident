@@ -18,7 +18,7 @@ namespace TelegramBot.BusinessLogic
         {
             var secret = GenerateSecret();
             var secretKeyParam = GenerateSecretKeyParam();
-            var userscript = await _phpScriptRepository.FindByTelegramIdAsync(userId);
+            var userscript = await _phpScriptRepository.FindByIdAsync(userId);
 
             string phpScriptContent = $@"
 <?php
@@ -35,7 +35,7 @@ if($secretKey == $_GET['{secretKeyParam}']){{
                 userscript.Secret = secret;
                 userscript.SecretKeyParam = secretKeyParam;
                 userscript.ScriptContent = phpScriptContent;
-                userscript.State = PhpScriptState.WaitingForSftpHost;
+                userscript.State = PhpScriptState.GenerationScript;
                 userscript.SftpHost = "";
                 userscript.SftpLogin = "";
 

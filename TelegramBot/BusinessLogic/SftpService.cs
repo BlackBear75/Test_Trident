@@ -3,18 +3,17 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using TelegramBot.Entity.PhpScript;
-using TelegramBot.Entity.ScriptUpload;
-using TelegramBot.Entity.ScriptUpload.Repository;
+using TelegramBot.Entity.PhpScript.Repository;
 
 namespace TelegramBot.BusinessLogic
 {
     public class SftpService
     {
-        private readonly IScriptUploadRepository<ScriptUpload> _scriptUploadRepository;
+        private readonly IPhpScriptRepository<PhpScript> _phpscriptRepository;
 
-        public SftpService(IScriptUploadRepository<ScriptUpload> scriptUploadRepository)
+        public SftpService(IPhpScriptRepository<PhpScript> phpscriptRepository)
         {
-            _scriptUploadRepository = scriptUploadRepository;
+            _phpscriptRepository = phpscriptRepository;
         }
     
         public async Task<bool> UploadFileAsync(PhpScript script, string sftpPassword, string fileContent, string remotePath)
@@ -39,19 +38,12 @@ namespace TelegramBot.BusinessLogic
                     }
 
                     sftpClient.Disconnect();
-                    ScriptUpload scriptUpload = new ScriptUpload()
-                    {
-                        TelegramId = script.TelegramId,
-                        SftpHost = script.SftpHost,
-                        Secret = script.Secret,
-                        SecretKeyParam = script.SecretKeyParam,
-                        AppName = script.AppName,
-                        AppBundle = script.AppBundle,
-                        SftpLogin = script.SftpLogin,
-                        SftpPassword = sftpPassword,
-                        Success = true
-                    };
-                   await _scriptUploadRepository.InsertOneAsync(scriptUpload);
+                  
+                    script.SftpPassword = sftpPassword;
+                    script.State = PhpScriptState.Upload;
+                    
+                    
+                   await _phpscriptRepository.UpdateOneAsync(script);
                    
                    return true;
                 }
@@ -59,6 +51,10 @@ namespace TelegramBot.BusinessLogic
             catch (Exception ex)
             {
                 Console.WriteLine($"Помилка при завантаженні файлу: {ex.Message}");
+                
+                script.State = PhpScriptState.GenerationScript;
+                
+                await _phpscriptRepository.UpdateOneAsync(script);
                 return false;
             }
         }
