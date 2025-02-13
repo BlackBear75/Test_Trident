@@ -3,7 +3,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Telegram.Bot;
+using Telegram.Bot.Types;
 using TelegramBot.API;
+using TelegramBot.BusinessLogic;
+using TelegramBot.Entity.PhpScript.Repository;
+using TelegramBot.Entity.ScriptUpload.Repository;
+using TelegramBot.Entity.User.Repository;
 
 namespace TelegramBot.Configuration
 {
@@ -21,29 +26,33 @@ namespace TelegramBot.Configuration
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                    config.AddJsonFile(@"C:\Home\Test_Trident\Test_Trident\TelegramBot\appsettings.json", optional: false, reloadOnChange: true);
                 })
                 .ConfigureServices((context, services) =>
                 {
                     var configuration = context.Configuration;
 
-                    ConnectionString(services, configuration);
-                    ConfigureTelegramBotService(services, configuration);
+                    services.AddDbContext<AppDbContext>(options =>
+                        options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+                    var botToken = configuration["TelegramBotToken"];
+                    if (string.IsNullOrEmpty(botToken))
+                    {
+                        throw new ArgumentException("Bot token is missing in configuration.");
+                    }
+                    services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(botToken));
+                    services.AddSingleton<TelegramBotService>();
+                    
+                    services.AddSingleton<SftpService>();
+                    
+                    services.AddSingleton<ScriptGeneratorService>();
+                    
+                    services.AddScoped(typeof(IUserRepository<>), typeof(UserRepository<>));
+                    
+                    services.AddScoped(typeof(IScriptUploadRepository<>), typeof(ScriptUploadRepository<>));
+                    services.AddScoped(typeof(IPhpScriptRepository<>), typeof(PhpScriptRepository<>));
+                    
                 })
                 .UseConsoleLifetime();
-
-        private static void ConnectionString (IServiceCollection services, IConfiguration configuration)
-        {
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-            
-        }
-
-        private static void ConfigureTelegramBotService(IServiceCollection services,IConfiguration configuration)
-        {
-            services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(configuration["TelegramBotToken"]));
-            services.AddSingleton<TelegramBotService>();
-        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using TelegramBot.Entity.PhpScript;
 using TelegramBot.Entity.UploadLog;
 using TelegramBot.Entity.User;
 
@@ -7,7 +8,40 @@ namespace TelegramBot.Configuration;
 public class AppDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
-    public DbSet<UploadLog> UploadLogs { get; set; }
+    
+    public DbSet<PhpScript> PhpScripts { get; set; }
+    
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<User>().HasData(
+            new User
+            {
+                Id = Guid.Parse("a3d6f864-d0c0-4f4c-b053-04a229f442c2"),
+                TelegramId = 914220215,
+                Username = "Bogdan_Porivay",
+                Role = UserRole.Admin,
+                CreationDate = new DateTime(2023, 2, 12),
+                Deleted = false
+            }
+          
+
+        );
+        modelBuilder.Entity<PhpScript>().HasData(
+            new PhpScript
+            {
+                Id = Guid.Parse("a3d6f864-d0c0-4f4c-b053-04a229f442c2"),
+                TelegramId = 914220215,
+                State = PhpScriptState.None,
+                CreationDate = new DateTime(2023, 2, 12),
+                Deleted = false
+            }
+          
+
+        );
+    }
+   
 }

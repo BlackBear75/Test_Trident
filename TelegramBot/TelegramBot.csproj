@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <Folder Include="Models\UserModel\" />
-      <Folder Include="BusinessLogic\" />
     </ItemGroup>
 
     <ItemGroup>

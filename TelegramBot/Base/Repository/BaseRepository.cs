@@ -14,7 +14,10 @@ public class BaseRepository<TDocument> : IBaseRepository<TDocument> where TDocum
         _context = context;
         _dbSet = context.Set<TDocument>();
     }
-    
+    public async Task<TDocument> FindByTelegramIdAsync(long telegramId)
+    {
+        return await _dbSet.FirstOrDefaultAsync(d => EF.Property<long>(d, "TelegramId") == telegramId && !d.Deleted);
+    }
     public async Task<string> GetConnectionString()
     {
         return _context.Database.GetDbConnection().ConnectionString;
