@@ -71,10 +71,7 @@ namespace TelegramBot.Migrations
             modelBuilder.Entity("TelegramBot.Entity.User.User", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");

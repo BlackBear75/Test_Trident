@@ -1,7 +1,6 @@
-﻿using Renci.SshNet;
-using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
+using Renci.SshNet;
+using Serilog;
 using TelegramBot.Entity.PhpScript;
 using TelegramBot.Entity.PhpScript.Repository;
 
@@ -20,13 +19,15 @@ namespace TelegramBot.BusinessLogic
         {
             try
             {
+                Log.Information($"Початок завантаження файлу на сервер для користувача {script.Id}");
+
                 using (var sftpClient = new SftpClient(script.SftpHost, script.SftpLogin, sftpPassword))
                 {
                     sftpClient.Connect();
 
                     if (!sftpClient.IsConnected)
                     {
-                        Console.WriteLine("Не вдалося підключитись до сервера.");
+                        Log.Error($"Не вдалося підключитись до сервера {script.SftpHost}.");
                         return false;
                     }
 
@@ -38,26 +39,23 @@ namespace TelegramBot.BusinessLogic
                     }
 
                     sftpClient.Disconnect();
-                  
+                    
                     script.SftpPassword = sftpPassword;
                     script.State = PhpScriptState.Upload;
                     
-                    
-                   await _phpscriptRepository.UpdateOneAsync(script);
-                   
-                   return true;
+                    await _phpscriptRepository.UpdateOneAsync(script);
+                    Log.Information("Файл успішно відправлений на сервер.");
+                    return true;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Помилка при завантаженні файлу: {ex.Message}");
-                
+                Log.Error(ex, $"Помилка при завантаженні файлу для користувача {script.Id}. Стан: {script.State}");
+
                 script.State = PhpScriptState.GenerationScript;
-                
                 await _phpscriptRepository.UpdateOneAsync(script);
                 return false;
             }
         }
-
     }
 }

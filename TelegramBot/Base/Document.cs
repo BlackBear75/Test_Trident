@@ -1,7 +1,12 @@
-﻿namespace TelegramBot.Base;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TelegramBot.Base;
 
 public abstract class Document
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)] 
     public long Id { get; set; }
     public DateTime CreationDate { get; set; }
     public bool Deleted { get; set; }

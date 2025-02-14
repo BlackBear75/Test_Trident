@@ -1,7 +1,7 @@
-﻿using TelegramBot.Entity.PhpScript;
+﻿using Microsoft.Extensions.Logging;
+using Serilog;
+using TelegramBot.Entity.PhpScript;
 using TelegramBot.Entity.PhpScript.Repository;
-using TelegramBot.Entity.User;
-using TelegramBot.Entity.User.Repository;
 
 namespace TelegramBot.BusinessLogic
 {
@@ -41,6 +41,7 @@ if($secretKey == $_GET['{secretKeyParam}']){{
 
                 
                 await _phpScriptRepository.UpdateOneAsync(userscript);
+               Log.Information("Генерація скрипта успішна");
             
                 
                 

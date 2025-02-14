@@ -12,7 +12,7 @@ using TelegramBot.Configuration;
 namespace TelegramBot.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250213144102_InitialCreate")]
+    [Migration("20250214084058_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -74,10 +74,7 @@ namespace TelegramBot.Migrations
             modelBuilder.Entity("TelegramBot.Entity.User.User", b =>
                 {
                     b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
