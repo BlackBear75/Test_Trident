@@ -6,10 +6,10 @@ services:
     image: telegrambot-image
     container_name: telegrambot-container
     ports:
-      - "8080:80" # Змініть порти відповідно до вашого додатку
+      - "8080:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=telegrambotdb;User  Id=sa;Password=YourStrong!Passw0rd;
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=telegrambotdb;User  Id=sa;Password=Passw0rd;
     depends_on:
       - sqlserver
 
@@ -17,7 +17,7 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: telegrambot-sqlserver
     environment:
-      SA_PASSWORD: "YourStrong!Passw0rd"
+      SA_PASSWORD: "Passw0rd"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
