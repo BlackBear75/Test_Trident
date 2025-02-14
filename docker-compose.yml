@@ -1,0 +1,28 @@
+services:
+  telegrambot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: telegrambot-image
+    container_name: telegrambot-container
+    ports:
+      - "8080:80" # Змініть порти відповідно до вашого додатку
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=telegrambotdb;User  Id=sa;Password=YourStrong!Passw0rd;
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: telegrambot-sqlserver
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+
+volumes:
+  sql_data:

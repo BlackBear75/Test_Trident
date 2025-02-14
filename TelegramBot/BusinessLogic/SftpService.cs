@@ -6,7 +6,12 @@ using TelegramBot.Entity.PhpScript.Repository;
 
 namespace TelegramBot.BusinessLogic
 {
-    public class SftpService
+    public interface ISftpService
+    {
+        Task<bool> UploadFileAsync(PhpScript script, string sftpPassword, string fileContent, string remotePath);
+        
+    }
+    public class SftpService : ISftpService
     {
         private readonly IPhpScriptRepository<PhpScript> _phpscriptRepository;
 

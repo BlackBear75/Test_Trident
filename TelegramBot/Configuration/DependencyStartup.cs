@@ -48,8 +48,10 @@ namespace TelegramBot.Configuration
 
                     services.AddSingleton<ITelegramBotClient>(new TelegramBotClient(botToken));
                     services.AddSingleton<TelegramBotService>();
-                    services.AddSingleton<SftpService>();
-                    services.AddSingleton<ScriptGeneratorService>();
+                    services.AddSingleton<ISftpService,SftpService>();
+                    services.AddSingleton<IScriptGeneratorService,ScriptGeneratorService>();
+                    
+                    services.AddSingleton<ITelegramBotClientWrapper, TelegramBotClientWrapper>();
 
                     services.AddScoped(typeof(IUserRepository<>), typeof(UserRepository<>));
                     services.AddScoped(typeof(IPhpScriptRepository<>), typeof(PhpScriptRepository<>));

@@ -24,9 +24,11 @@ public class BaseRepository<TDocument> : IBaseRepository<TDocument> where TDocum
         return await _dbSet.Where(d => !d.Deleted).ToListAsync();
     }
 
-    public async Task<TDocument> FindByIdAsync(long id)
+    public async Task<TDocument?> FindByIdAsync(long id)
     {
-        return await _dbSet.FirstOrDefaultAsync(d => d.Id == id && !d.Deleted);
+        
+            return await _dbSet.FirstOrDefaultAsync(d => d.Id == id && !d.Deleted);
+        
     }
 
     public async Task InsertOneAsync(TDocument document)

@@ -15,16 +15,19 @@ namespace TelegramBot.API;
 public class TelegramBotService
 {
     private readonly ITelegramBotClient _botClient;
+    
+    private readonly ITelegramBotClientWrapper _botClientWrapper;
     private readonly IServiceProvider _services;
-    private readonly IUserRepository<User> _userRepository;
-    private readonly ScriptGeneratorService _scriptGeneratorService;
-    private readonly SftpService _sftpClientService;
-    private readonly IPhpScriptRepository<PhpScript> _phpScriptRepository;
+    private readonly IUserRepository<User?> _userRepository;
+    private readonly IScriptGeneratorService _scriptGeneratorService;
+    private readonly ISftpService _sftpClientService;
+    private readonly IPhpScriptRepository<PhpScript?> _phpScriptRepository;
 
     public TelegramBotService(ITelegramBotClient botClient, IServiceProvider services,
-        IUserRepository<User> userRepository, ScriptGeneratorService scriptGeneratorService,
-        SftpService sftpClientService, IPhpScriptRepository<PhpScript> phpScriptRepository)
+        IUserRepository<User?> userRepository, IScriptGeneratorService scriptGeneratorService,
+        ISftpService sftpClientService, IPhpScriptRepository<PhpScript?> phpScriptRepository,ITelegramBotClientWrapper botClientWrapper)
     {
+        _botClientWrapper = botClientWrapper;
         _botClient = botClient;
         _services = services;
         _userRepository = userRepository;
@@ -41,7 +44,7 @@ public class TelegramBotService
         await Task.Delay(-1);
     }
 
-    private async Task UpdateHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+    public async Task UpdateHandler(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
         if (update.Type != UpdateType.Message || update.Message?.Text == null) return;
 
@@ -55,8 +58,12 @@ public class TelegramBotService
 
         if (user.Role == UserRole.Guest) return;
         
-        var userScript = await _phpScriptRepository.FindByIdAsync(message.From.Id);
-
+        var userScript = await _phpScriptRepository.FindByIdAsync(message.From.Id)  ;
+        
+        if (userScript == null)
+        {
+            userScript = await CreateScriptAsync(message.From.Id);
+        }
         if (message.Text.StartsWith("/admin"))
         {
             await HandleAdminCommands(message, user, cancellationToken);
@@ -81,7 +88,8 @@ public class TelegramBotService
         await _phpScriptRepository.InsertOneAsync(script);
         return script;
     }
-private async Task HandleAdminCommands(Message message, User user, CancellationToken cancellationToken)
+
+    public async Task HandleAdminCommands(Message message, User user, CancellationToken cancellationToken)
 {
     var commandParts = message.Text.Split(' ');
     if (message.Text == "/admin")
@@ -92,7 +100,7 @@ private async Task HandleAdminCommands(Message message, User user, CancellationT
 /admin setrole {UserId} {Role} - Змінити роль.
 /admin uploads - Останні завантаження.
 /admin help - Довідка.";
-        await _botClient.SendTextMessageAsync(message.Chat.Id, adminCommands, cancellationToken: cancellationToken);
+        await _botClientWrapper.SendMessage(message.Chat.Id, adminCommands, cancellationToken: cancellationToken);
         return;
     }
     switch (commandParts[1].ToLower()) 
@@ -100,19 +108,19 @@ private async Task HandleAdminCommands(Message message, User user, CancellationT
         case "users":
             var users = await _userRepository.GetAllAsync();
             var userList = string.Join("\n", users.Select(u => $"{u.Username} - {u.Id} - {u.Role}"));
-            await _botClient.SendTextMessageAsync(message.Chat.Id, $"Список користувачів:\n{userList}", cancellationToken: cancellationToken);
+            await _botClientWrapper.SendMessage(message.Chat.Id, $"Список користувачів:\n{userList}", cancellationToken: cancellationToken);
             break;
 
         case "setrole":
             if (commandParts.Length < 3)
             {
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Формат: /admin setrole {UserId} {Role}", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Формат: /admin setrole {UserId} {Role}", cancellationToken: cancellationToken);
                 return;
             }
             
             if (!long.TryParse(commandParts[2], out var targetUserId) || !Enum.TryParse(commandParts[3], true, out UserRole newRole))
             {
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Неправильний формат! Використовуйте: /admin setrole {UserId} {Role}", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Неправильний формат! Використовуйте: /admin setrole {UserId} {Role}", cancellationToken: cancellationToken);
                 return;
             }
 
@@ -121,22 +129,22 @@ private async Task HandleAdminCommands(Message message, User user, CancellationT
             {
                 targetUser.Role = newRole;
                 await _userRepository.UpdateOneAsync(targetUser);
-                await _botClient.SendTextMessageAsync(message.Chat.Id, $"Роль користувача {targetUser.Username} змінена на {newRole}.", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, $"Роль користувача {targetUser.Username} змінена на {newRole}.", cancellationToken: cancellationToken);
             }
             else
             {
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Користувач не знайдений.", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Користувач не знайдений.", cancellationToken: cancellationToken);
             }
             break;
 
         case "uploads":
             var uploads = await _phpScriptRepository.GetLastUploadsAsync(10);
             var uploadList = string.Join("\n", uploads.Select(u => $"{u.Id} - {u.AppName} - {u.SftpHost}"));
-            await _botClient.SendTextMessageAsync(message.Chat.Id, $"Останні 10 завантажень:\n{uploadList}", cancellationToken: cancellationToken);
+            await _botClientWrapper.SendMessage(message.Chat.Id, $"Останні 10 завантажень:\n{uploadList}", cancellationToken: cancellationToken);
             break;
 
         default:
-            await _botClient.SendTextMessageAsync(message.Chat.Id, "Невідома команда адміністратора.", cancellationToken: cancellationToken);
+            await _botClientWrapper.SendMessage(message.Chat.Id, "Невідома команда адміністратора.", cancellationToken: cancellationToken);
             break;
     }
 }
@@ -146,27 +154,27 @@ private async Task HandleAdminCommands(Message message, User user, CancellationT
         switch (message.Text.ToLower())
         {
             case "/start":
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Привіт! Уведіть /generate для створення скрипта.", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Привіт! Уведіть /generate для створення скрипта.", cancellationToken: cancellationToken);
                 break;
 
             case "/generate":
                 if (user.Role < UserRole.User)
                 {
-                    await _botClient.SendTextMessageAsync(message.Chat.Id, "У вас нема прав для генерації скрипта.", cancellationToken: cancellationToken);
+                    await _botClientWrapper.SendMessage(message.Chat.Id, "У вас нема прав для генерації скрипта.", cancellationToken: cancellationToken);
                     return;
                 }
                 userScript.State = PhpScriptState.WaitingForAppName;
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Уведіть назву додатку (AppName):", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Уведіть назву додатку (AppName):", cancellationToken: cancellationToken);
                 break;
 
             case "/upload":
                 if (user.Role < UserRole.User || userScript.State < PhpScriptState.GenerationScript)
                 {
-                    await _botClient.SendTextMessageAsync(message.Chat.Id, "Недостаньо даних, згенеруйте скрипт /generate", cancellationToken: cancellationToken);
+                    await _botClientWrapper.SendMessage(message.Chat.Id, "Недостаньо даних, згенеруйте скрипт /generate", cancellationToken: cancellationToken);
                     return;
                 }
                 userScript.State = PhpScriptState.WaitingForSftpHost;
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Уведіть данні для підключення к SFTP:\nХост:", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Уведіть данні для підключення к SFTP:\nХост:", cancellationToken: cancellationToken);
                 break;
 
             default:
@@ -182,28 +190,28 @@ private async Task HandleAdminCommands(Message message, User user, CancellationT
             case PhpScriptState.WaitingForAppName:
                 userScript.AppName = message.Text;
                 userScript.State = PhpScriptState.WaitingForAppBundle;
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Уведіть AppBundle:", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Уведіть AppBundle:", cancellationToken: cancellationToken);
                 break;
             case PhpScriptState.WaitingForAppBundle:
                 var phpScript = await _scriptGeneratorService.GeneratePhpScript(message.Text, userScript.Id);
-                await _botClient.SendTextMessageAsync(message.Chat.Id, $"Генерація завершена!\nSecret: {phpScript.Secret}\nSecretParams: {phpScript.SecretKeyParam}\nЩоб відправити ваш скрипт уведіть /upload", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, $"Генерація завершена!\nSecret: {phpScript.Secret}\nSecretParams: {phpScript.SecretKeyParam}\nЩоб відправити ваш скрипт уведіть /upload", cancellationToken: cancellationToken);
                 break;
             case PhpScriptState.WaitingForSftpHost:
                 userScript.SftpHost = message.Text;
                 userScript.State = PhpScriptState.WaitingForSftpLogin;
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Уведіть логін для SFTP:", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Уведіть логін для SFTP:", cancellationToken: cancellationToken);
                 break;
             case PhpScriptState.WaitingForSftpLogin:
                 userScript.SftpLogin = message.Text;
                 userScript.State = PhpScriptState.WaitingForSftpPassword;
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Уведіть пароль для SFTP:", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Уведіть пароль для SFTP:", cancellationToken: cancellationToken);
                 break;
             case PhpScriptState.WaitingForSftpPassword:
                 var uploadResult = await _sftpClientService.UploadFileAsync(userScript, message.Text, userScript.ScriptContent, "/remote/path/script.php");
-                await _botClient.SendTextMessageAsync(message.Chat.Id, uploadResult ? "Файл успешно завантажений!" : "Помилка завантаження.", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, uploadResult ? "Файл успешно завантажений!" : "Помилка завантаження.", cancellationToken: cancellationToken);
                 break;
             default:
-                await _botClient.SendTextMessageAsync(message.Chat.Id, "Невірна команда аба незавершенний процесс.", cancellationToken: cancellationToken);
+                await _botClientWrapper.SendMessage(message.Chat.Id, "Невірна команда аба незавершенний процесс.", cancellationToken: cancellationToken);
                 break;
         }
         await _phpScriptRepository.UpdateOneAsync(userScript);

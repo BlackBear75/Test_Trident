@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TelegramBot.Entity.PhpScript;
-using TelegramBot.Entity.UploadLog;
 using TelegramBot.Entity.User;
 
 namespace TelegramBot.Configuration;

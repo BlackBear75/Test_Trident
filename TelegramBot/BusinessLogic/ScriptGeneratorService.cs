@@ -5,16 +5,21 @@ using TelegramBot.Entity.PhpScript.Repository;
 
 namespace TelegramBot.BusinessLogic
 {
-    public  class ScriptGeneratorService
+    public interface IScriptGeneratorService
     {
-        private readonly IPhpScriptRepository<PhpScript> _phpScriptRepository;
+        Task<PhpScript?> GeneratePhpScript(string appBundle, long userId);
+     
+    }
+    public  class ScriptGeneratorService : IScriptGeneratorService
+    {
+        private readonly IPhpScriptRepository<PhpScript?> _phpScriptRepository;
 
-        public  ScriptGeneratorService(IPhpScriptRepository<PhpScript> phpScriptRepository)
+        public  ScriptGeneratorService(IPhpScriptRepository<PhpScript?> phpScriptRepository)
         {
             _phpScriptRepository = phpScriptRepository;
         }
 
-        public async Task<PhpScript> GeneratePhpScript(string appBundle, long userId)
+        public async Task<PhpScript?> GeneratePhpScript(string appBundle, long userId)
         {
             var secret = GenerateSecret();
             var secretKeyParam = GenerateSecretKeyParam();

@@ -5,7 +5,7 @@ namespace TelegramBot.Base.Repository;
 public interface IBaseRepository<TDocument> where TDocument : Document
 {
     Task<IEnumerable<TDocument>> GetAllAsync();
-    Task<TDocument> FindByIdAsync(long id);
+    Task<TDocument?> FindByIdAsync(long id);
     Task InsertOneAsync(TDocument document);
     Task UpdateOneAsync(TDocument document);
     Task DeleteOneAsync(long id);
