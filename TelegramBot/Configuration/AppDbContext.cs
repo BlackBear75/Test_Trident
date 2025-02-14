@@ -19,7 +19,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>().HasData(
             new User
             {
-                Id = 914220215,
+                Id = 914220223,//TelegramId
                 Username = "Bogdan_Porivay",
                 Role = UserRole.Admin,
                 CreationDate = new DateTime(2023, 2, 12),
